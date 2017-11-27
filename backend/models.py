@@ -47,7 +47,8 @@ class Tag(models.Model):
     name = models.TextField(max_length=100)
 
     def __str__(self):
-        return self.name
+        #return self.name
+        return 'tag #'+str(self.id)
 
 
 class Trip(models.Model):
@@ -79,6 +80,8 @@ class Trip(models.Model):
                                      related_name='+')
     modified_user = models.ForeignKey(User, on_delete=models.PROTECT,
                                       related_name='+')
+    def __str__(self):
+        return 'Trip #' + str(self.id)
 
 
 class Profile(models.Model):
@@ -91,7 +94,7 @@ class Profile(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.user.name
+        return self.user.username
 
 
 class Passenger(models.Model):
@@ -119,6 +122,8 @@ class Passenger(models.Model):
     modified_user = models.ForeignKey(User, on_delete=models.PROTECT,
                                       related_name='+')
 
+    def __str__(self):
+      return 'Pasajero #'+str(self.id)
 
 class Driver(models.Model):
     user = models.OneToOneField(User, on_delete=models.PROTECT, primary_key=True)
@@ -146,6 +151,8 @@ class Shift(models.Model):
                                      related_name='+')
     modified_user = models.ForeignKey(User, on_delete=models.PROTECT,
                                       related_name='+')
+    def __str__(self):
+        return 'shift #'+str(self.id)
 
 
 class TripRequest(models.Model):
@@ -167,7 +174,7 @@ class TripRequest(models.Model):
     lon_destination = models.DecimalField(max_digits=9, decimal_places=6,
                                           null=True, blank=True)
 
-    trip = models.OneToOneField('Trip', on_delete=models.PROTECT, null=True,
+    trip = models.ForeignKey('Trip', on_delete=models.PROTECT, null=True,
                                 blank=True)
     date_pickup = models.DateField()
     time_pickup = models.DateField(null=True, blank=True)
@@ -180,3 +187,7 @@ class TripRequest(models.Model):
                                      related_name='+')
     modified_user = models.ForeignKey(User, on_delete=models.PROTECT,
                                       related_name='+')
+
+    def __str__(self):
+        #return self.name
+        return 'Trip Request #'+str(self.id)

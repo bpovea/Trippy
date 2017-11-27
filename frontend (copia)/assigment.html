@@ -74,9 +74,9 @@
 		                      			<div class="clearfix"></div>
 		                      		</div>
 		                      		<div  class="panel-body">
-					                    <div class="column-items" id="column-items"  ondrop="drop(event)" ondragover="allowDrop(event)" dropable="true" request_panel="true">
+					                    <div class="column-items" id="column-items"  ondrop="drop(event)" ondragover="allowDrop(event)" dropable="true">
 					                        <% _.each(tripRequests, function(tripRequest){ %>
-						                        <div id="drag-clientRequest-<%= tripRequest.get('id') %>" id_solicitud="<%= tripRequest.get('id') %>" id_cliente="<%= tripRequest.get('user').id %>" class="panel panel-primary" draggable="true" ondragstart="drag(event)" last_trip="none">
+						                        <div id="drag-clientRequest-AQUI" id_solicitud="AQUI" id_cliente="AQUI" class="panel panel-primary" draggable="true" ondragstart="drag(event)" >
 						                            <div class="panel-heading">
 						                        		<div class="pull-left" id="solicitud-AQUI-title">
 						                                	Pasajero: <%= tripRequest.get('user').first_name %> <%= tripRequest.get('user').last_name %>
@@ -117,12 +117,12 @@
 						                        	<div class="clearfix"></div>
 						                    	</div>
 							                    <div id="div-assigment-trip-<%= trip.get('id') %>" class="panel-body">
-					                        		<div class="column-items" name="trip" id_trip="<%= trip.get('id') %>" id="column-items-<%= trip.get('id') %>" ondrop="drop(event)" ondragover="allowDrop(event)" dropable="true">
+					                        		<div class="column-items" name="trip" id_trip="trip-<%= trip.get('id') %>" id="column-items-<%= trip.get('id') %>" ondrop="drop(event)" ondragover="allowDrop(event)" dropable="true">
 					                        			<% _.each(trip.get('passengers'), function(passenger){ %>
-					                        				<div id="drag-clientPreAsigment-<%= passenger.id %>" class="panel panel-primary" draggable="true" ondragstart="drag(event)" last_trip="<%= trip.get('id') %>" passenger_id="<%= passenger.id %>">
+					                        				<div id="drag-clientPreAsigment-<%= passenger.id %>" class="panel panel-primary" draggable="true" ondragstart="drag(event)">
 					                            				<div class="panel-heading">
 					                              					<div class="pull-left" id="column-<%= passenger.id %>-title">
-					                                					Pasajero: <%= passenger.user.first_name %> <%= passenger.user.last_name %>
+					                                					Pasajero: <%= passenger.first_name %> <%= passenger.last_name %>
 					                              					</div>
 					                              					
 					                              					<div class="clearfix"></div>

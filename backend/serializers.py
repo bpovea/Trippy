@@ -1,19 +1,37 @@
 from rest_framework import serializers
-from .models import TripRequest, Place, Trip, Driver, Passenger, Vehicle
+from .models import TripRequest, Place, Trip, Driver, Passenger, Vehicle, Profile
 from django.contrib.auth.models import User
+from itertools import chain
 
 #Shift, VehicleBrand, VehicleModel, Tag, Profile
 
 
+
+class TripRequestIdsSerializerBP(serializers.ModelSerializer):
+	class Meta:
+		model = TripRequest
+		fields = '__all__'
 
 class UserSerializerBP(serializers.ModelSerializer):
 	class Meta:
 		model = User
 		exclude = ('password',)
 
+class ProfileSerializerBP(serializers.ModelSerializer):
+	user = UserSerializerBP(read_only=True)
+	class Meta:
+		model = Profile
+		fields= '__all__'
+
 class PlaceSerializerBP(serializers.ModelSerializer):
 	class Meta:
 		model = Place
+		fields = '__all__'
+
+class PassengerIdsSerializerBP(serializers.ModelSerializer):
+	#user = UserSerializerBP(read_only=True)
+	class Meta:
+		model = Passenger
 		fields = '__all__'
 
 class PassengerSerializerBP(serializers.ModelSerializer):
@@ -42,12 +60,15 @@ class TripSerializerBP(serializers.ModelSerializer):
 	class Meta:
 		model = Trip
 		fields = '__all__'
-
+	
 	def get_passengers(self, obj):
-		passengers = obj.passengers.all()
-		serializer = UserSerializerBP(passengers, many=True)
+		usuarios = obj.passengers.all()
+		tripid = obj.id
+		pasajeros = []
+		for usuario in usuarios:
+			pasajeros.append(usuario.passenger_set.get(trip=tripid))
+		serializer = PassengerSerializerBP(pasajeros, many=True)
 		return serializer.data
-
 
 class TripIdsSerializerBP(serializers.ModelSerializer):
 	class Meta:
@@ -62,6 +83,7 @@ class TripRequestSerializerBP(serializers.ModelSerializer):
 	class Meta:
 		model = TripRequest
 		fields = '__all__'
+
 
 
 

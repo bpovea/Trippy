@@ -12,10 +12,6 @@ var TripRequest = Backbone.Model.extend({
   urlRoot: siteRoot+'/tripRequests/'
 });
 
-var Passenger = Backbone.Model.extend({
-  urlRoot: siteRoot+'/passengers/'
-});
-
 //var Cliente = Backbone.Model.extend();
 
 //colecciones
@@ -79,80 +75,18 @@ var TripRequestsList = Backbone.View.extend({
   },
   events: {
     //'dragover .column-items' : 'saveClient',//mejor no usar jeje....
-    'drop .column-items' : 'updatePassenger',//al insertarse en el area
+    'drop .column-items' : 'saveTrip',//al insertarse en el area
     'click #button-trip-trash' : 'deleteTrip',
     'click #createNnewTrip' : 'newTrip',
     'click #newTripRequests' : 'newTripRequest'
     //'dragleave .column-items' : 'saveClient',//deja el area
     //'dragenter .column-items' : 'saveClient',//entra al area
   },
-  updatePassenger: function(ev){
-    //console.log($(ev.currentTarget));//padre de elemento
-    //console.log($(ev.currentTarget.lastElementChild));//.attr('name'));//atributo name de elemento agregado
-    //console.log($(ev.currentTarget).attr('id_trip'));
-    if ($(ev.currentTarget).attr('id_trip')!=null){
-      if($(ev.currentTarget.lastElementChild).attr('last_trip')==$(ev.currentTarget).attr('id_trip')){
-        console.log("No actualizar pasajero");
-      }else if($(ev.currentTarget.lastElementChild).attr('last_trip')=="none"){
-        console.log("creando nuevo pasajero.");
-        
-        var user_newPassenger = $(ev.currentTarget.lastElementChild).attr('id_cliente');
-        var trip_newPassenger = $(ev.currentTarget).attr('id_trip');
-        var tripRequest_newPassenger = $(ev.currentTarget.lastElementChild).attr('id_solicitud'); 
-
-        var passengerDetails = {
-          "user":user_newPassenger,
-          "tags":[1],
-          "trip":trip_newPassenger,
-          "trip_request":tripRequest_newPassenger,
-          "created_user":1,//cambiar
-          "modified_user":1//cambiar
-        };
-
-        var newPassenger = new Passenger();
-
-        newPassenger.save(passengerDetails, {
-          success: function(newPassenger){
-            //$(ev.currentTarget.lastElementChild).attr('last_trip',trip_newPassenger); //update trip
-            console.log("Passenger creado con éxito.");
-            tripRequestsList.render();
-          } 
-        });
-      }
-      else{
-        console.log("actualizando pasajero.");
-        var newTripForPassenger = $(ev.currentTarget).attr('id_trip');
-        var passenger_id = $(ev.currentTarget.lastElementChild).attr('passenger_id')
-        var passenger = new Passenger({"id":passenger_id});
-        passenger.fetch({
-          success: function(passenger){
-            console.log(newTripForPassenger);
-            passenger.save({"trip":newTripForPassenger});
-            //$(ev.currentTarget.lastElementChild).attr('last_trip',$(ev.currentTarget).attr('id_trip'));
-            console.log("Passenger actualizado");
-            tripRequestsList.render();
-          }
-        });
-      }
-    }else if($(ev.currentTarget.lastElementChild).attr('last_trip')!="none"){
-      console.log("eliminando pasajero.");
-      var passenger_id = $(ev.currentTarget.lastElementChild).attr('passenger_id')
-      console.log(passenger_id);
-      var passenger = new Passenger({"id":passenger_id});
-      passenger.fetch({
-        success: function(passenger){
-          passenger.destroy({
-            success: function(){
-              //$(ev.currentTarget.lastElementChild).attr('last_trip',"none");
-              console.log("Passenger eliminado");
-            }
-          });
-        }
-      });
-    }else{
-      console.log("No actualizar pasajero");
-    }
-
+  saveTrip: function(ev){
+    console.log("save")
+    console.log($(ev.currentTarget));//padre de elemento
+    console.log($(ev.currentTarget.lastElementChild));//.attr('name'));//atributo name de elemento agregado
+    //console.log($(ev.currentTarget.lastElementChild).attr('id_cliente'))
   },
   deleteTrip: function(ev){
     console.log("delete:")
@@ -175,8 +109,7 @@ var TripRequestsList = Backbone.View.extend({
     var driverid = $("#newTripDriver").val();
     var d = new Date();
     var date = d.toString();
-    var date_start = d.getFullYear()+"-"+d.getMonth()+"-"+d.getDate();
-    console.log(date_start);
+    var date_start = d.getFullYear()+"-"+d.getMonth()+"-"+d.getDay();
 
     var tripDetails = {
       "date_start":date_start,
@@ -257,8 +190,8 @@ router.on('route:home', function(){
 
 function allowDrop(ev) {
     ev.preventDefault();
-    //console.log(ev.target);
-    //console.log(ev.target.getAttribute("dropable"));
+    console.log(ev.target);
+    console.log(ev.target.getAttribute("dropable"));
     if (ev.target.getAttribute("dropable") == "true")
         ev.dataTransfer.dropEffect = "all";
     else
@@ -272,9 +205,9 @@ function drag(ev) {
 function drop(ev) {
     ev.preventDefault();
     var data = ev.dataTransfer.getData("text");
-    //console.log(data);//id elemento a transferir
-    //console.log(ev.target);//target del lugar de destino
-    //console.log(document.getElementById(data));//target de elemeto a tranferir
+    console.log(data);//id elemento a transferir
+    console.log(ev.target);//target del lugar de destino
+    console.log(document.getElementById(data));//target de elemeto a tranferir
     ev.target.appendChild(document.getElementById(data));
 }
 
