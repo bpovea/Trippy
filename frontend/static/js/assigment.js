@@ -145,6 +145,7 @@ var TripRequestsList = Backbone.View.extend({
             success: function(){
               //$(ev.currentTarget.lastElementChild).attr('last_trip',"none");
               console.log("Passenger eliminado");
+              tripRequestsList.render();
             }
           });
         }
@@ -164,11 +165,11 @@ var TripRequestsList = Backbone.View.extend({
           trip.destroy({
             success: function(){
               console.log("trip deleted");
+              tripRequestsList.render();
             }
           });
         }
       });
-    tripRequestsList.render();
   },
   newTrip: function(ev){
     var vehicleid = $("#newTripVehicle").val(); 

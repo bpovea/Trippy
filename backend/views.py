@@ -152,6 +152,10 @@ def passengerDetail(request, pk):
         serializer = PassengerIdsSerializerBP(passenger, data={'trip':trip}, partial=True)
         if serializer.is_valid():
             serializer.save()
+            tripRequest = TripRequest.objects.get(pk=request.data.get('trip_request'))
+            trip = Trip.objects.get(pk=request.data.get('trip'))
+            tripRequest.trip = trip
+            tripRequest.save()
             return Response(serializer.data)
         else:
             return Response(
