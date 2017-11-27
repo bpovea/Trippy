@@ -77,11 +77,13 @@ def tripsDetail(request, pk):
 
     elif request.method == 'DELETE':
         passengers = trip.passengers.all()
+        print(passengers)
         for p in passengers:
+            trs = TripRequest.objects.filter(trip=trip)
+            for tr in trs:
+                tr.trip=None
+                tr.save()
             Passenger.objects.get(user=p,trip=trip).delete()
-            tr = TripRequest.objects.get(trip=trip)
-            tr.trip=None
-            tr.save()
         trip.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -119,7 +121,6 @@ def passengerList(request):
     return JsonResponse(serializer.data, safe = False)
 
   elif request.method == 'POST':
-    print(request.data)
     serializer = PassengerIdsSerializerBP(data=request.data)
     if serializer.is_valid():
         serializer.save()
@@ -130,7 +131,6 @@ def passengerList(request):
         tripRequest.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     else:
-        print(serializer.errors)
         return Response(
             serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
