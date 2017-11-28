@@ -82,7 +82,8 @@ var TripRequestsList = Backbone.View.extend({
     'drop .column-items' : 'updatePassenger',//al insertarse en el area
     'click #button-trip-trash' : 'deleteTrip',
     'click #createNnewTrip' : 'newTrip',
-    'click #newTripRequests' : 'newTripRequest'
+    'click #newTripRequests' : 'newTripRequest',
+    'click #button-trip-notification' : 'sendNotifications'
     //'dragleave .column-items' : 'saveClient',//deja el area
     //'dragenter .column-items' : 'saveClient',//entra al area
   },
@@ -230,6 +231,18 @@ var TripRequestsList = Backbone.View.extend({
         console.log("Request creado con éxito.");
         tripRequestsList.render();
       } 
+    });
+  },
+  sendNotifications: function(ev){
+    console.log("enviando notificaciones.");
+    //console.log($(ev.currentTarget).attr('trip_id'));//elemento usado
+    var id = $(ev.currentTarget).attr('trip_id');
+    var trip = new Trip({id: id});
+    trip.fetch({
+      success: function(trip){
+        trip.save({"notified":"True"});
+        console.log("Enviado correctamete.");
+      }
     });
   }
 });

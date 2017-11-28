@@ -80,6 +80,7 @@ class Trip(models.Model):
                                      related_name='+')
     modified_user = models.ForeignKey(User, on_delete=models.PROTECT,
                                       related_name='+')
+    notified = models.BooleanField(default=False, blank=True)
     def __str__(self):
         return 'Trip #' + str(self.id)
 

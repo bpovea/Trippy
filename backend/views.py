@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from .models import TripRequest, Place, Trip, Driver, Passenger, Vehicle, Profile
+from .mail import send_email
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from .serializers import *
@@ -8,6 +9,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, viewsets
 from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
 
 
 @csrf_exempt 
@@ -66,9 +68,24 @@ def tripsDetail(request, pk):
         serializer = TripIdsSerializerBP(trip)
         return Response(serializer.data)
 
-    elif request.method == 'PUT':
-        serializer = TripIdsSerializerBP(trip, data=request.data)
+    elif request.method == 'PUT': ##Corregir##############################################################################
+        notified = request.data.get('notified')
+        serializer = TripIdsSerializerBP(trip, data={'notified':notified}, partial=True)
         if serializer.is_valid():
+            users = trip.passengers.all()
+            for user in users:
+                body = """Estimado/a %s %s\n\nNos complace informarle que ha sido asignado a la ruta con el chofer: %s %s.\n\nLa hora prevista para recogerle será: %s y la hora prevista para su llegada a su destino es: %s.\n\nGracias por utilizar nuestro servicio.\n"""%(user.first_name,user.last_name,trip.driver.user.first_name,trip.driver.user.last_name,str(trip.time_start),str(trip.time_end))
+                recipient = [user.email]
+                cc = []
+                if(user.email != ""):
+                    print("enviando "+user.first_name)
+                    send_email(settings.EMAIL,
+                               settings.PASSWORD_EMAIL,
+                               recipient, 
+                               cc,
+                               'Información de ruta asignada', 
+                               body)
+            print("enviado")
             serializer.save()
             return Response(serializer.data)
         else:

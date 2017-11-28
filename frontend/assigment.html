@@ -44,7 +44,7 @@
 			            </p>
 			        </div>
 			        <div class="pull-right">
-			            <button type="button" class="btn btn-sm btn-default" data-dismiss="panel" aria-hidden="true" id="button-add-trip" title="Add Trip Asigment Column" data-toggle="modal" data-target="#newTripModal">
+			            <button type="button" class="btn btn-sm btn-default" data-dismiss="panel" aria-hidden="true" id="button-add-trip" title="Crear nueva ruta" data-toggle="modal" data-target="#newTripModal">
 			                <span class="glyphicon glyphicon-plus"></span>
 			            </button>
 			        </div>                        
@@ -55,7 +55,7 @@
 		        <table id="tripAssigmentBoardContainerTable" style="width: 100%" >
 		            <tbody>
 		              	<tr id="tripAssigment-row">
-		                	<td id="passenger" class="tripAssigment-column" style="width: 35%">
+		                	<td id="passenger" class="tripAssigment-column" style="width: 35%" valign="top">
 		                  		<div class="panel panel-default">
 			                    	<div class="panel-heading">
 		                      			<div class="pull-left" id="column-passengers-title">
@@ -63,10 +63,10 @@
 		                      			</div>
 			                      		<div class="pull-right">
 			                        		<div class="btn-group btn-group-xs">
-				                        		<button type="button" class="btn btn-sm btn-default" data-dismiss="panel" aria-hidden="true" id="button-add-trip" title="Add Trip Asigment Column" data-toggle="modal" data-target="#newTripRequestModal">
+				                        		<button type="button" class="btn btn-sm btn-default" data-dismiss="panel" aria-hidden="true" id="button-add-trip" title="Nueva asignacion" data-toggle="modal" data-target="#newTripRequestModal">
 									                <span class="glyphicon glyphicon-plus"></span>
 									            </button>
-			                          			<button type="button" class="btn btn-sm btn-default" aria-hidden="true" id="button-add-tripAsigment-item" title="Filter Trip Asigment Item" data-toggle="modal" data-target="#filterModal">
+			                          			<button type="button" class="btn btn-sm btn-default" aria-hidden="true" id="button-add-tripAsigment-item" title="Filtrar" data-toggle="modal" data-target="#filterModal">
 			                            			<span class="glyphicon glyphicon-filter"></span> 
 			                            		</button>         
 			                        		</div>
@@ -98,7 +98,7 @@
 						            </div>
 						        </div>    
 						    </td>
-						    <td id="trips" class="kanban-column">
+						    <td id="trips" class="kanban-column" valign="top">
 						    	<div class="col-md-12">
 						    		<% _.each(trips, function(trip){ %>
 						    			<div class="col-md-6" id="trip-<%= trip.get('id')%>">						    	
@@ -109,9 +109,12 @@
 					                        		</div>
 					                        		<div class="pull-right">
 						                          		<div class="btn-group btn-group-xs">
-							                            	<button type="button" class="btn btn-sm btn-default" id="button-trip-trash" trip_id="<%= trip.get('id') %>" title="Trash Column">
+						                          			<button type="button" class="btn btn-sm btn-default" id="button-trip-notification" trip_id="<%= trip.get('id') %>" title="Enviar notificaciones">
+							                              		<span class="glyphicon glyphicon-send"></span>
+							                            	</button>   
+							                            	<button type="button" class="btn btn-sm btn-default" id="button-trip-trash" trip_id="<%= trip.get('id') %>" title="Eliminar ruta">
 							                              		<span class="glyphicon glyphicon-trash"></span>
-							                            	</button>            
+							                            	</button>
 						                          		</div>
 						                        	</div>
 						                        	<div class="clearfix"></div>
