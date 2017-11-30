@@ -1,7 +1,7 @@
 //namespace for our app
 
 var app = {};
-var siteRoot = 'http://localhost:8000'
+var siteRoot = 'http://192.168.1.5:8000'
 
 //Modelos   
 var Trip = Backbone.Model.extend({

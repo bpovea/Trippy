@@ -85,7 +85,13 @@ def tripsDetail(request, pk):
                                cc,
                                'Información de ruta asignada', 
                                body)
+            user = trip.driver.user
+            devices = user.fcmdevice_set.all()
+            devices.send_message("Nueva Asignación", "Se ha agregado o actualizado una ruta a su usuario")
+            devices.send_message(data={"trip": True})
+
             print("enviado")
+
             serializer.save()
             return Response(serializer.data)
         else:

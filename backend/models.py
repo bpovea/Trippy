@@ -22,9 +22,9 @@ class VehicleModel(models.Model):
 
 class Vehicle(models.Model):
     plate = models.TextField(max_length=10, db_index=True, unique=True)
-    brand = models.ForeignKey('VehicleBrand', on_delete=models.PROTECT)
-    model = models.ForeignKey('VehicleModel', on_delete=models.PROTECT)
-    photo = models.ImageField(upload_to='vehicles')
+    brand = models.ForeignKey('VehicleBrand', on_delete=models.PROTECT,blank=True)
+    model = models.ForeignKey('VehicleModel', on_delete=models.PROTECT,blank=True)
+    photo = models.ImageField(upload_to='vehicles',blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
 
@@ -84,6 +84,13 @@ class Trip(models.Model):
     def __str__(self):
         return 'Trip #' + str(self.id)
 
+class Sector(models.Model):
+    name = models.TextField(max_length=100)
+
+    def __str__(self):
+        #return self.name
+        return 'sector #'+str(self.id)
+        
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.PROTECT, primary_key=True)
@@ -91,8 +98,12 @@ class Profile(models.Model):
                                    null=True, blank=True)
     lon_home = models.DecimalField(max_digits=9, decimal_places=6,
                                    null=True, blank=True)
+    address = models.TextField(max_length=200, blank=True)
+    sector = models.ForeignKey('Sector',blank=True,null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    phone = models.TextField(max_length=50, blank=True)
     modified_at = models.DateTimeField(auto_now=True)
+
 
     def __str__(self):
         return self.user.username
@@ -128,7 +139,7 @@ class Passenger(models.Model):
 
 class Driver(models.Model):
     user = models.OneToOneField(User, on_delete=models.PROTECT, primary_key=True)
-    photo = models.ImageField(upload_to='vehicles')
+    photo = models.ImageField(upload_to='vehicles', blank=True)
     vehicles = models.ManyToManyField('Vehicle', related_name='drivers')
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
@@ -154,6 +165,10 @@ class Shift(models.Model):
                                       related_name='+')
     def __str__(self):
         return 'shift #'+str(self.id)
+
+
+#class Scheduler(models.Model):
+
 
 
 class TripRequest(models.Model):

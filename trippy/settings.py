@@ -25,7 +25,7 @@ SECRET_KEY = 'qze0+55z(x8v+f(ff044#ex+tjz0d(b%_ndma3^5376_vfc4(q'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -135,3 +135,43 @@ STATIC_URL = '/static/'
 
 EMAIL = 'pruebastripy@gmail.com'
 PASSWORD_EMAIL = 'pruebaprueba'
+
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+STATICFILES_DIRS = [
+  os.path.join(BASE_DIR, 'public/static/', ),
+]
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+
+
+
+# APPS
+
+INSTALLED_APPS += [
+    'rest_framework.authtoken',
+    'fcm_django',
+    'django_filters'
+]
+
+
+
+
+# FCM
+FCM_DJANGO_SETTINGS={
+    'FCM_SERVER_KEY':'AAAAlDYRIpc:APA91bHfdFyzOsm80-tyx2gnwz6Kr98pSclhzNl8uL7pK3lynfelq2BOXZ0JrLz1A1pM54k36BKhcFzUFA3Pw1d4MbfDwyUR37G00yQIN3LroUdBdlIb3NYs1H6haAiWLJwy_IBK7l5D'
+}
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'rest_framework.filters.SearchFilter',
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
+}

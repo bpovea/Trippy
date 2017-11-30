@@ -79,7 +79,7 @@
 						                        <div id="drag-clientRequest-<%= tripRequest.get('id') %>" id_solicitud="<%= tripRequest.get('id') %>" id_cliente="<%= tripRequest.get('user').id %>" class="panel panel-primary" draggable="true" ondragstart="drag(event)" last_trip="none">
 						                            <div class="panel-heading">
 						                        		<div class="pull-left" id="solicitud-AQUI-title">
-						                                	Pasajero: <%= tripRequest.get('user').first_name %> <%= tripRequest.get('user').last_name %>
+						                                	Pasajero: <%= tripRequest.get('user').last_name %> <%= tripRequest.get('user').first_name %>
 						                              	</div>
 						                                <div class="clearfix"></div> 
 						                            </div>
@@ -125,7 +125,7 @@
 					                        				<div id="drag-clientPreAsigment-<%= passenger.id %>" class="panel panel-primary" draggable="true" ondragstart="drag(event)" last_trip="<%= trip.get('id') %>" passenger_id="<%= passenger.id %>">
 					                            				<div class="panel-heading">
 					                              					<div class="pull-left" id="column-<%= passenger.id %>-title">
-					                                					Pasajero: <%= passenger.user.first_name %> <%= passenger.user.last_name %>
+					                                					Pasajero: <%= passenger.user.last_name %> <%= passenger.user.first_name %>
 					                              					</div>
 					                              					
 					                              					<div class="clearfix"></div>
@@ -192,10 +192,11 @@
 		        				<label>Pasajero: </label>
 			        				<select id="newTripRequestsUser" name="user">
 			        					<% _.each(profiles, function(profile){ %>
-			        						<option value="<%= profile.get('user').id %>"><%= profile.get('user').first_name %> <%= profile.get('user').last_name %></option>
+			        						<option value="<%= profile.get('user').id %>"><%= profile.get('user').last_name %> <%= profile.get('user').first_name %></option>
 			        					<% }); %>
 									  	
 									</select>
+									<br>
 								<label>Fecha</label>
 								<input type="Date" name="date_pickup" id="newTripRequestsDate" />
 								<label>Turno: </label>
