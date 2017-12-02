@@ -18,6 +18,7 @@ urlpatterns = [
 	
 	url(r'^tripRequests/$', csrf_exempt(views.tripRequestList)),
 	url(r'^trips/$', csrf_exempt(views.tripList)),
+	url(r'^trips/filters/$', csrf_exempt(views.tripListFilter )),
 	url(r'^drivers/$', csrf_exempt(views.driversList)),
 	url(r'^vehicles/$', csrf_exempt(views.vehiclesList)),
 	url(r'^profiles/$', csrf_exempt(views.profilesList)),

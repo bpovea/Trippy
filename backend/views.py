@@ -49,6 +49,16 @@ def tripList(request):
             serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @csrf_exempt 
+@api_view(['GET'])
+def tripListFilter(request):
+  if request.method == 'GET':
+    lower_limit = request.GET.get('date_start')
+    upper_limit = request.GET.get('date_end')
+    trip = Trip.objects.filter(date_start__range=(lower_limit, upper_limit))
+    serializer = TripSerializerBP(trip, many = True)
+    return JsonResponse(serializer.data, safe = False)
+
+@csrf_exempt 
 @api_view(['GET', 'POST'])
 def tripIdsList(request):
   if request.method == 'GET':
@@ -65,7 +75,7 @@ def tripsDetail(request, pk):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        serializer = TripIdsSerializerBP(trip)
+        serializer = TripSerializerBP(trip)
         return Response(serializer.data)
 
     elif request.method == 'PUT': ##Corregir##############################################################################

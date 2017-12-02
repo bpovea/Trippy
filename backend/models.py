@@ -63,8 +63,8 @@ class Trip(models.Model):
                                           related_name='+', null=True, blank=True)
     date_start = models.DateField()
     date_end = models.DateField(null=True, blank=True)
-    time_start = models.DateField(null=True, blank=True)
-    time_end = models.DateField(null=True, blank=True)
+    time_start = models.TimeField(null=True, blank=True)
+    time_end = models.TimeField(null=True, blank=True)
     CREATED = 0
     ON_TRIP = 1
     FINISHED = 2
@@ -124,9 +124,9 @@ class Passenger(models.Model):
     lon_destination = models.DecimalField(max_digits=9, decimal_places=6,
                                           null=True, blank=True)
     date_pickup = models.DateField(null=True, blank=True)
-    time_pickup = models.DateField(null=True, blank=True)
+    time_pickup = models.TimeField(null=True, blank=True)
     date_arrive = models.DateField(null=True, blank=True)
-    time_arrive = models.DateField(null=True, blank=True)
+    time_arrive = models.TimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
     created_user = models.ForeignKey(User, on_delete=models.PROTECT,

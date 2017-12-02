@@ -1,26 +1,38 @@
 <!DOCTYPE html>
 <html>
 	<head>
-	  <meta charset="UTF-8">
-	  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-	  <title>Asignaciones</title>
-	  <link rel="stylesheet" href="./static/css/bootstrap.min.css">
-	  <style type="text/css">
-	            .tripAsigment-column {
-	                vertical-align: top;
-	                height: 200px;
-	            }
-	            .item-title {
-	                float: left;
-	            }
-	            .kanban-column{
-	              padding-left: 5px;
-	              padding-right: 5px;
-	            }
-	            .column-items{
-	              padding-bottom: 25px;
-	            }
-	        </style> 
+		  <meta charset="UTF-8">
+		  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		  <title>Asignaciones</title>
+		  <link rel="stylesheet" href="./static/css/bootstrap.min.css">
+		  <style type="text/css">
+	        .tripAsigment-column {
+	            vertical-align: top;
+	            height: 200px;
+	        }
+	        .item-title {
+	            float: left;
+	        }
+	        .kanban-column{
+	          padding-left: 5px;
+	          padding-right: 5px;
+	        }
+	        .column-items{
+	          padding-bottom: 25px;
+	        }
+	        {
+			    outline:none;
+			    
+			    box-shadow:0 0 0 2px #68b, inset 0 0 0 1px #ddd;
+			}
+
+			/* items grabbed state */
+			[data-draggable="item"][aria-grabbed="true"]
+			{
+			    background:#8ad;
+			    color:#fff;
+			}
+	    </style> 
 	</head>
 	<body>
 	  	<div class="row">
@@ -74,9 +86,9 @@
 		                      			<div class="clearfix"></div>
 		                      		</div>
 		                      		<div  class="panel-body">
-					                    <div class="column-items" id="column-items"  ondrop="drop(event)" ondragover="allowDrop(event)" dropable="true" request_panel="true">
+					                    <div class="column-items" id="column-items"  ondrop="drop(event)" ondragover="allowDrop(event)" dropable="true" request_panel="true" data-draggable="target">
 					                        <% _.each(tripRequests, function(tripRequest){ %>
-						                        <div id="drag-clientRequest-<%= tripRequest.get('id') %>" id_solicitud="<%= tripRequest.get('id') %>" id_cliente="<%= tripRequest.get('user').id %>" class="panel panel-primary" draggable="true" ondragstart="drag(event)" last_trip="none">
+						                        <div id="drag-clientRequest-<%= tripRequest.get('id') %>" id_solicitud="<%= tripRequest.get('id') %>" id_cliente="<%= tripRequest.get('user').id %>" class="panel panel-primary" draggable="true" ondragstart="drag(event)" last_trip="none" data-draggable="item">
 						                            <div class="panel-heading">
 						                        		<div class="pull-left" id="solicitud-AQUI-title">
 						                                	Pasajero: <%= tripRequest.get('user').last_name %> <%= tripRequest.get('user').first_name %>
@@ -120,9 +132,9 @@
 						                        	<div class="clearfix"></div>
 						                    	</div>
 							                    <div id="div-assigment-trip-<%= trip.get('id') %>" class="panel-body">
-					                        		<div class="column-items" name="trip" id_trip="<%= trip.get('id') %>" id="column-items-<%= trip.get('id') %>" ondrop="drop(event)" ondragover="allowDrop(event)" dropable="true">
+					                        		<div class="column-items" name="trip" id_trip="<%= trip.get('id') %>" id="column-items-<%= trip.get('id') %>" ondrop="drop(event)" ondragover="allowDrop(event)" dropable="true" data-draggable="target">
 					                        			<% _.each(trip.get('passengers'), function(passenger){ %>
-					                        				<div id="drag-clientPreAsigment-<%= passenger.id %>" class="panel panel-primary" draggable="true" ondragstart="drag(event)" last_trip="<%= trip.get('id') %>" passenger_id="<%= passenger.id %>">
+					                        				<div id="drag-clientPreAsigment-<%= passenger.id %>" class="panel panel-primary" draggable="true" ondragstart="drag(event)" last_trip="<%= trip.get('id') %>" passenger_id="<%= passenger.id %>" data-draggable="item">
 					                            				<div class="panel-heading">
 					                              					<div class="pull-left" id="column-<%= passenger.id %>-title">
 					                                					Pasajero: <%= passenger.user.last_name %> <%= passenger.user.first_name %>

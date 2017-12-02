@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	  <meta charset="UTF-8">
+	  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	  <title>Reportes</title>
+	  <link rel="stylesheet" href="./static/css/bootstrap.min.css">
+	  <style type="text/css">
+	  	.trip{
+    		cursor:pointer;
+	  	}
+	  	tr, th{
+	  		text-align: center;
+	  	}
+	  	.passengerDetail{
+	  		padding-left: 15px;
+	  	}
+	  	#filters-content {
+    		text-align: right;
+		    padding: 10px;
+		    padding-right: 32px;
+		}
+	  </style>
+	</head>
+	<body>
+		<div class="row">
+	    	<div class="col-md-12" id="tripRequest-board-here">
+				<div class="panel panel-default">
+				    <div class="panel-heading">
+				    	<div class="pull-left" >
+				            <h3 class="panel-title">Reportes de rutas</h3>
+				            <br/>
+				            <p>
+				            	Puedes dar click en las rutas y ver más información de ellas.
+			            	</p>
+				        </div>
+				        <div class="pull-right">
+			            <button type="button" class="btn btn-sm btn-default" data-dismiss="panel" aria-hidden="true" id="button-newQuery" title="Nueva Consulta" data-toggle="modal" data-target="#newQueryModal">
+			            	Nuevo reporte
+			            </button>
+			        </div>                        
+			    	<div class="clearfix"></div>
+		    		</div>
+		    		<div class="panel-body" id="content-here"></div>
+		    	</div>
+		   	</div>
+		</div>
+
+		<!-- Modals-->
+		<div id="modal-here"></div>
+
+		<script type="text/template" id="query_result_TripRequest">
+			<div class="col-md-12" id="filters-content">
+				<span class="glyphicon glyphicon-search"></span> <input type="text" id="myInput" placeholder="Buscar por conductor" title="Escribe un nombre">
+			</div>
+			<table class="table table-hover col-md-12">
+				<thead>
+					<tr>
+						<th>
+							N°
+						</th>
+						<th>
+							Estado
+						</th>
+						<th>
+							Conductor
+						</th>
+						<th>
+							Vehiculo
+						</th>
+						<th>
+							Origen
+						</th>
+						<th>
+							Hora inicio
+						</th>
+						<th>
+							Destino
+						</th>
+						<th>
+							Hora llegada
+						</th>
+						<th>
+							Pasajeros
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					<% var i = 1 %>
+					<% _.each(trips, function(trip){ %>
+						<tr class="trip" id_trip="<%= trip.get('id') %>" title="Detalles">
+						  <td>
+						  	<%= i %>
+						  </td>
+						  <td>
+						  	<%= trip.get('status') %>
+						  </td>
+						  <td>
+						  	<%= trip.get('driver').user.first_name %> <%= trip.get('driver').user.last_name %>
+						  </td>
+						  <td>
+						  	<%= trip.get('vehicle').plate %>
+						  </td>
+						  <td>
+						  	<%= trip.get('place_origin').name %><br/>
+						  	<%= trip.get('date_start')%>
+						  </td>
+						  <td>
+						  	<%= trip.get('time_start') %>
+						  </td>
+						  <td>
+						  	<%= trip.get('place_destination').name %><br/>
+						  	<%= trip.get('date_end') %>
+						  </td>
+						  <td>
+						  	<%= trip.get('time_end') %>
+						  </td>
+						  <td>
+						  	<%= Object.keys(trip.get('passengers')).length %>
+						  </td>
+						</tr>
+						<% i++ %>
+					<% }); %>
+				</tbody>
+			</table>
+		</script>
+
+		<script type="text/template" id="details_modal_template">
+			<div class="modal fade" id="detailsModal" role="dialog">
+			    <div class="modal-dialog">
+			    <!-- Modal content-->
+			      	<div class="modal-content">
+		    	    	<div class="modal-header">
+		        	  		<button type="button" class="close closeDetailsModal" data-dismiss="modal">&times;</button>
+		          			<h4 class="modal-title">Detalles</h4>
+		        		</div>
+		        		<div class="modal-body">
+	        				<label>Pasajeros: </label>
+	        				<br/>
+	        				<%  _.each(trip.passengers, function(passenger){ %>
+	        					<div class="passengerDetail">
+		        					<label><span class="glyphicon glyphicon-user"></span> <%= passenger.user.last_name %> <%= passenger.user.first_name %> </label>
+		        					<div class="passengerDetail">
+			        					<p>
+			        						<b>Subió:</b> <%= passenger.time_pickup %><br/>
+			        						<b>Bajó:</b> <%= passenger.time_arrive %>
+			        					</p>
+		        					</div>
+		        				</div>
+	        				<% }); %>
+	        				
+		        		</div>
+		        		<div class="modal-footer">
+		        			<button type="button" class="closeDetailsModal" data-dismiss="modal" >Cerrar</button>
+		        		</div>
+
+		      		</div>
+		    	</div>
+		  	</div>
+		</script>
+
+		<script type="text/template" id="newQuery_modal_template">
+			<div class="modal fade" id="newQueryModal" role="dialog">
+			    <div class="modal-dialog">
+			    <!-- Modal content-->
+			      	<div class="modal-content" style="text-align: center;">
+		    	    	<div class="modal-header">
+		        	  		<button type="button" class="close" data-dismiss="modal">&times;</button>
+		          			<h4 class="modal-title">Consulta</h4>
+		        		</div>
+		        		<div class="modal-body">
+	        				<label>Desde: </label>
+	        				<input type="date" name="desde" id="desde"><br>
+	        				<label>Hasta: </label>
+	        				<input type="date" name="hasta" id="hasta">
+		        		</div>
+		        		<div class="modal-footer">
+		        			<button  type="button" class="btn btn-sm btn-default" data-dismiss="modal" id="searchTrips">Buscar</button>
+		        			<button type="button" class="btn btn-sm btn-default" data-dismiss="modal" >Cancelar</button>
+		        		</div>
+
+		      		</div>
+		    	</div>
+		  	</div>
+		</script>
+		<!-- Libraries -->
+		<script src="./static/js/jquery-3.2.1.min.js" type="text/javascript"></script>
+	  	<script src="./static/js/underscore-min.js" type="text/javascript"></script>
+	  	<script src="./static/js/backbone-min.js" type="text/javascript"></script>
+	  	<script src="./static/js/reports.js" type="text/javascript"></script>
+	  	<script src="./static/js/bootstrap.min.js" type="text/javascript"></script>
+	</body>
+</html>
