@@ -1,8 +1,17 @@
 //namespace for our app
-
+//global variables
 var app = {};
 //var siteRoot = 'http://192.168.1.5:8000'
 var siteRoot = 'http://localhost:8000'
+
+//dictionary for storing the selections data 
+//comprising an array of the currently selected items 
+//and a reference to the selected items' owning container
+var selections = 
+{
+    items : [],
+    owner : null
+};
 
 //Modelos   
 var Trip = Backbone.Model.extend({
@@ -67,6 +76,28 @@ var TripRequestsList = Backbone.View.extend({
                                                 vehicles : vehicles.models,
                                                 profiles : profiles.models
                                               }));
+                        //exclude older browsers by the features we need them to support
+                        //and legacy opera explicitly so we don't waste time on a dead browser
+                        if
+                        (
+                            !document.querySelectorAll 
+                            || 
+                            !('draggable' in document.createElement('span')) 
+                            || 
+                            window.opera
+                        ) 
+                        { return; }
+
+                        //get the collection of draggable items and add their draggable attributes
+                        for(var 
+                            items = document.querySelectorAll('[data-draggable="item"]'), 
+                            len = items.length, 
+                            i = 0; i < len; i ++)
+                        {
+                            items[i].setAttribute('draggable', 'true');
+                            items[i].setAttribute('aria-grabbed', 'false');
+                            items[i].setAttribute('tabindex', '0');
+                        }
                       }
                     });
                   }
@@ -77,8 +108,6 @@ var TripRequestsList = Backbone.View.extend({
         });
       }
     });
-    console.log("ejecutando");
-    initializeNewDragDrop();
   },
   events: {
     //'dragover .column-items' : 'saveClient',//mejor no usar jeje....
@@ -86,7 +115,9 @@ var TripRequestsList = Backbone.View.extend({
     'click #button-trip-trash' : 'deleteTrip',
     'click #createNnewTrip' : 'newTrip',
     'click #newTripRequests' : 'newTripRequest',
-    'click #button-trip-notification' : 'sendNotifications'
+    'click #button-trip-notification' : 'sendNotifications',
+    'mousedown' : 'mousedown',
+    'mouseup' : 'mouseup'
     //'dragleave .column-items' : 'saveClient',//deja el area
     //'dragenter .column-items' : 'saveClient',//entra al area
   },
@@ -247,6 +278,100 @@ var TripRequestsList = Backbone.View.extend({
         console.log("Enviado correctamete.");
       }
     });
+  },
+  //mousedown event to implement single selection
+  mousedown: function(e){
+    //console.log("mousedown");
+    var element = e.target;
+    //5 como maximo veces para econtrar si tiene un padre dragable
+    try
+    {
+      for (i=0; i<5; i++){
+        if(element.getAttribute('draggable'))
+          break;
+        else
+          element = element.parentNode;
+      }
+      //if the element is a draggable item
+      if(element.getAttribute('draggable')){
+        console.log("here1");
+        //if the multiple selection modifier is not pressed 
+        //and the item's grabbed state is currently false
+        if
+        (
+            !hasModifier(e) 
+            && 
+            element.getAttribute('aria-grabbed') == 'false'
+        )
+        {
+            //clear all existing selections
+            clearSelections();
+        
+            //then add this new selection
+            addSelection(element);
+        }
+      }
+      //else [if the element is anything else]
+      //and the selection modifier is not pressed 
+      else if(!hasModifier(e))
+      {
+        //clear all existing selections
+        clearSelections();
+      }
+    }catch(err){
+      //console.log("no, sorry");
+    }
+  },
+  //mouseup event to implement multiple selection
+  mouseup: function(e){
+    //console.log("mouseup");
+    //console.log(e.ctrlKey);
+    var element = e.target;
+    try{
+      //5 como maximo veces para econtrar si tiene un padre dragable
+      for (i=0; i<5; i++){
+        if(element.getAttribute('draggable'))
+          break;
+        else
+          element = element.parentNode;
+      }
+      //if the element is a draggable item 
+      //and the multipler selection modifier is pressed
+      if
+      (
+          element.getAttribute('draggable') 
+          && 
+          hasModifier(e)
+      )
+      {
+        //console.log("here2");
+        //if the item's grabbed state is currently true
+        if(element.getAttribute('aria-grabbed') == 'true')
+        {
+          //console.log('here2.1');
+          //unselect this item
+          removeSelection(element);
+          //console.log('here2.2');
+          //if that was the only selected item 
+          //then reset the owner container reference            
+          if(!selections.items.length)
+          {
+              selections.owner = null;
+          }
+          //console.log('here2.3');
+        }
+        
+        //else [if the item's grabbed state is false]
+        else
+        {
+          //console.log('here2.4');
+          //add this additional selection
+          addSelection(element);
+        }
+      }
+    }catch(err){
+      console.log("no, sorry");
+    }
   }
 });
 
@@ -299,182 +424,81 @@ function drop(ev) {
 }
 
 
-function initializeNewDragDrop()
+
+//---------------------Added-------------------------------
+
+//function for selecting an item
+function addSelection(item)
 {
-
-    //exclude older browsers by the features we need them to support
-    //and legacy opera explicitly so we don't waste time on a dead browser
-    if
-    (
-        !document.querySelectorAll 
-        || 
-        !('draggable' in document.createElement('span')) 
-        || 
-        window.opera
-    ) 
-    { return; }
-
-    //get the collection of draggable items and add their draggable attributes
-    for(var 
-        items = document.querySelectorAll('[data-draggable="item"]'), 
-        len = items.length, 
-        i = 0; i < len; i ++)
+    //if the owner reference is still null, set it to this item's parent
+    //so that further selection is only allowed within the same container
+    if(!selections.owner)
     {
-        console.log("here");
-        items[i].setAttribute('draggable', 'true');
-        items[i].setAttribute('aria-grabbed', 'false');
-        items[i].setAttribute('tabindex', '0');
-    }
-
-
-
-    //dictionary for storing the selections data 
-    //comprising an array of the currently selected items 
-    //and a reference to the selected items' owning container
-    var selections = 
-    {
-        items : [],
-        owner : null
-    };
-    
-    //function for selecting an item
-    function addSelection(item)
-    {
-        //if the owner reference is still null, set it to this item's parent
-        //so that further selection is only allowed within the same container
-        if(!selections.owner)
-        {
-            selections.owner = item.parentNode;
-        }
-        
-        //or if that's already happened then compare it with this item's parent
-        //and if they're not the same container, return to prevent selection
-        else if(selections.owner != item.parentNode)
-        {
-            return;
-        }
-                
-        //set this item's grabbed state
-        item.setAttribute('aria-grabbed', 'true');
-        
-        //add it to the items array
-        selections.items.push(item);
+        selections.owner = item.parentNode;
     }
     
-    //function for unselecting an item
-    function removeSelection(item)
+    //or if that's already happened then compare it with this item's parent
+    //and if they're not the same container, return to prevent selection
+    else if(selections.owner != item.parentNode)
     {
-        //reset this item's grabbed state
-        item.setAttribute('aria-grabbed', 'false');
-        
-        //then find and remove this item from the existing items array
+        return;
+    }
+            
+    //set this item's grabbed state
+    item.setAttribute('aria-grabbed', 'true');
+    
+    //add it to the items array
+    selections.items.push(item);
+}
+
+//function for unselecting an item
+function removeSelection(item)
+{
+    //reset this item's grabbed state
+    item.setAttribute('aria-grabbed', 'false');
+    
+    //then find and remove this item from the existing items array
+    for(var len = selections.items.length, i = 0; i < len; i ++)
+    {
+        if(selections.items[i] == item)
+        {
+            selections.items.splice(i, 1);
+            break;
+        }
+    }
+}
+
+//function for resetting all selections
+function clearSelections()
+{
+    //if we have any selected items
+    if(selections.items.length)
+    {
+        //reset the owner reference
+        selections.owner = null;
+
+        //reset the grabbed state on every selected item
         for(var len = selections.items.length, i = 0; i < len; i ++)
         {
-            if(selections.items[i] == item)
-            {
-                selections.items.splice(i, 1);
-                break;
-            }
+            selections.items[i].setAttribute('aria-grabbed', 'false');
         }
+
+        //then reset the items array        
+        selections.items = [];
     }
-    
-    //function for resetting all selections
-    function clearSelections()
-    {
-        //if we have any selected items
-        if(selections.items.length)
-        {
-            //reset the owner reference
-            selections.owner = null;
+}
 
-            //reset the grabbed state on every selected item
-            for(var len = selections.items.length, i = 0; i < len; i ++)
-            {
-                selections.items[i].setAttribute('aria-grabbed', 'false');
-            }
+//shorctut function for testing whether a selection modifier is pressed
+function hasModifier(e)
+{
+    return (e.ctrlKey || e.metaKey || e.shiftKey);
+}
 
-            //then reset the items array        
-            selections.items = [];
-        }
-    }
 
-    //shorctut function for testing whether a selection modifier is pressed
-    function hasModifier(e)
-    {
-        return (e.ctrlKey || e.metaKey || e.shiftKey);
-    }
-    
-    
 
-    //mousedown event to implement single selection
-    document.addEventListener('mousedown', function(e)
-    {
-        //if the element is a draggable item
-        if(e.target.getAttribute('draggable'))
-        {
-            //if the multiple selection modifier is not pressed 
-            //and the item's grabbed state is currently false
-            if
-            (
-                !hasModifier(e) 
-                && 
-                e.target.getAttribute('aria-grabbed') == 'false'
-            )
-            {
-                //clear all existing selections
-                clearSelections();
-            
-                //then add this new selection
-                addSelection(e.target);
-            }
-        }
-        
-        //else [if the element is anything else]
-        //and the selection modifier is not pressed 
-        else if(!hasModifier(e))
-        {
-            //clear all existing selections
-            clearSelections();
-        }
-
-    }, false);
-    
-    //mouseup event to implement multiple selection
-    document.addEventListener('mouseup', function(e)
-    {
-        //if the element is a draggable item 
-        //and the multipler selection modifier is pressed
-        if
-        (
-            e.target.getAttribute('draggable') 
-            && 
-            hasModifier(e)
-        )
-        {
-            //if the item's grabbed state is currently true
-            if(e.target.getAttribute('aria-grabbed') == 'true')
-            {
-                //unselect this item
-                removeSelection(e.target);
-                
-                //if that was the only selected item 
-                //then reset the owner container reference            
-                if(!selections.items.length)
-                {
-                    selections.owner = null;
-                }
-            }
-            
-            //else [if the item's grabbed state is false]
-            else
-            {
-                //add this additional selection
-                addSelection(e.target);
-            }
-        }
-        
-    }, false);
-
+//--------------------------------------------------------------------------------
+function initializeNewDragDrop()
+{   
     //dragstart event to initiate mouse dragging
     document.addEventListener('dragstart', function(e)
     {
