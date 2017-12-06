@@ -33,6 +33,14 @@
 			    color:#fff;
 			    border: solid;
 			}
+			[data-draggable="target"][aria-dropeffect="move"]
+			{
+			    border: dashed;
+			    border-color: #013c6f;
+			    border-width: 2px;
+			    background-color: #e6c27f;
+			}
+			
 	    </style> 
 	</head>
 	<body>
@@ -87,9 +95,9 @@
 		                      			<div class="clearfix"></div>
 		                      		</div>
 		                      		<div  class="panel-body">
-					                    <div class="column-items" id="column-items"  ondrop="drop(event)" ondragover="allowDrop(event)" dropable="true" request_panel="true" data-draggable="target">
+					                    <div class="column-items" id="column-items" request_panel="true"  data-draggable="target">
 					                        <% _.each(tripRequests, function(tripRequest){ %>
-						                        <div id="drag-clientRequest-<%= tripRequest.get('id') %>" id_solicitud="<%= tripRequest.get('id') %>" id_cliente="<%= tripRequest.get('user').id %>" class="panel panel-primary" draggable="true" ondragstart="drag(event)" last_trip="none" data-draggable="item">
+						                        <div id="drag-clientRequest-<%= tripRequest.get('id') %>" id_solicitud="<%= tripRequest.get('id') %>" id_cliente="<%= tripRequest.get('user').id %>" class="panel panel-primary" data-draggable="item" last_trip="none">
 						                            <div class="panel-heading">
 						                        		<div class="pull-left" id="solicitud-AQUI-title">
 						                                	Pasajero: <%= tripRequest.get('user').last_name %> <%= tripRequest.get('user').first_name %>
@@ -133,9 +141,9 @@
 						                        	<div class="clearfix"></div>
 						                    	</div>
 							                    <div id="div-assigment-trip-<%= trip.get('id') %>" class="panel-body">
-					                        		<div class="column-items" name="trip" id_trip="<%= trip.get('id') %>" id="column-items-<%= trip.get('id') %>" ondrop="drop(event)" ondragover="allowDrop(event)" dropable="true" data-draggable="target">
+					                        		<div class="column-items" name="trip" id_trip="<%= trip.get('id') %>" id="column-items-<%= trip.get('id') %>" data-draggable="target">
 					                        			<% _.each(trip.get('passengers'), function(passenger){ %>
-					                        				<div id="drag-clientPreAsigment-<%= passenger.id %>" class="panel panel-primary" draggable="true" ondragstart="drag(event)" last_trip="<%= trip.get('id') %>" passenger_id="<%= passenger.id %>" data-draggable="item">
+					                        				<div id="drag-clientPreAsigment-<%= passenger.id %>" class="panel panel-primary" last_trip="<%= trip.get('id') %>" passenger_id="<%= passenger.id %>" data-draggable="item">
 					                            				<div class="panel-heading">
 					                              					<div class="pull-left" id="column-<%= passenger.id %>-title">
 					                                					Pasajero: <%= passenger.user.last_name %> <%= passenger.user.first_name %>

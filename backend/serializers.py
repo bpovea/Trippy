@@ -75,6 +75,7 @@ class TripSerializerBP(serializers.ModelSerializer):
         for usuario in usuarios:
             pasajeros.append(usuario.passenger_set.get(trip=tripid))
         serializer = PassengerSerializerBP(pasajeros, many=True)
+        print(serializer.data)
         return serializer.data
 
     def get_status(self,obj):

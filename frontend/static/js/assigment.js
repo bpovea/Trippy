@@ -6,12 +6,23 @@ var siteRoot = 'http://localhost:8000'
 
 //dictionary for storing the selections data 
 //comprising an array of the currently selected items 
-//and a reference to the selected items' owning container
+//a reference to the selected items' owning container
+//and a refernce to the current drop target container
 var selections = 
 {
-    items : [],
-    owner : null
+    items      : [],
+    owner      : null,
+    droptarget : null
 };
+
+var items;
+var targets;
+var droptarget;
+
+//related variable is needed to maintain a reference to the 
+//dragleave's relatedTarget, since it doesn't have e.relatedTarget
+var related = null;
+
 
 //Modelos   
 var Trip = Backbone.Model.extend({
@@ -88,8 +99,17 @@ var TripRequestsList = Backbone.View.extend({
                         ) 
                         { return; }
 
+                        //get the collection of draggable targets and add their draggable attribute
+                        for(
+                            targets = document.querySelectorAll('[data-draggable="target"]'), 
+                            len = targets.length, 
+                            i = 0; i < len; i ++)
+                        {
+                            targets[i].setAttribute('aria-dropeffect', 'none');
+                        }
+
                         //get the collection of draggable items and add their draggable attributes
-                        for(var 
+                        for(
                             items = document.querySelectorAll('[data-draggable="item"]'), 
                             len = items.length, 
                             i = 0; i < len; i ++)
@@ -111,13 +131,19 @@ var TripRequestsList = Backbone.View.extend({
   },
   events: {
     //'dragover .column-items' : 'saveClient',//mejor no usar jeje....
-    'drop .column-items' : 'updatePassenger',//al insertarse en el area
+    //'drop .column-items' : 'updatePassenger',//al soltarce en el area
     'click #button-trip-trash' : 'deleteTrip',
     'click #createNnewTrip' : 'newTrip',
     'click #newTripRequests' : 'newTripRequest',
     'click #button-trip-notification' : 'sendNotifications',
     'mousedown' : 'mousedown',
-    'mouseup' : 'mouseup'
+    'mouseup' : 'mouseup',
+    'dragstart' : 'dragstart',
+    'dragenter' : 'dragenter',
+    'dragleave' : 'dragleave',
+    'dragover' : 'dragover',
+    'dragend' : 'dragend'
+
     //'dragleave .column-items' : 'saveClient',//deja el area
     //'dragenter .column-items' : 'saveClient',//entra al area
   },
@@ -125,70 +151,6 @@ var TripRequestsList = Backbone.View.extend({
     //console.log($(ev.currentTarget));//padre de elemento
     //console.log($(ev.currentTarget.lastElementChild));//.attr('name'));//atributo name de elemento agregado
     //console.log($(ev.currentTarget).attr('id_trip'));
-    if ($(ev.currentTarget).attr('id_trip')!=null){
-      if($(ev.currentTarget.lastElementChild).attr('last_trip')==$(ev.currentTarget).attr('id_trip')){
-        console.log("No actualizar pasajero");
-      }else if($(ev.currentTarget.lastElementChild).attr('last_trip')=="none"){
-        console.log("creando nuevo pasajero.");
-        
-        var user_newPassenger = $(ev.currentTarget.lastElementChild).attr('id_cliente');
-        var trip_newPassenger = $(ev.currentTarget).attr('id_trip');
-        var tripRequest_newPassenger = $(ev.currentTarget.lastElementChild).attr('id_solicitud'); 
-
-        var passengerDetails = {
-          "user":user_newPassenger,
-          "tags":[1],
-          "trip":trip_newPassenger,
-          "trip_request":tripRequest_newPassenger,
-          "created_user":1,//cambiar
-          "modified_user":1//cambiar
-        };
-
-        var newPassenger = new Passenger();
-
-        newPassenger.save(passengerDetails, {
-          success: function(newPassenger){
-            //$(ev.currentTarget.lastElementChild).attr('last_trip',trip_newPassenger); //update trip
-            console.log("Passenger creado con éxito.");
-            tripRequestsList.render();
-          } 
-        });
-      }
-      else{
-        console.log("actualizando pasajero.");
-        var newTripForPassenger = $(ev.currentTarget).attr('id_trip');
-        var passenger_id = $(ev.currentTarget.lastElementChild).attr('passenger_id')
-        var passenger = new Passenger({"id":passenger_id});
-        passenger.fetch({
-          success: function(passenger){
-            console.log(newTripForPassenger);
-            passenger.save({"trip":newTripForPassenger});
-            //$(ev.currentTarget.lastElementChild).attr('last_trip',$(ev.currentTarget).attr('id_trip'));
-            console.log("Passenger actualizado");
-            tripRequestsList.render();
-          }
-        });
-      }
-    }else if($(ev.currentTarget.lastElementChild).attr('last_trip')!="none"){
-      console.log("eliminando pasajero.");
-      var passenger_id = $(ev.currentTarget.lastElementChild).attr('passenger_id')
-      console.log(passenger_id);
-      var passenger = new Passenger({"id":passenger_id});
-      passenger.fetch({
-        success: function(passenger){
-          passenger.destroy({
-            success: function(){
-              //$(ev.currentTarget.lastElementChild).attr('last_trip',"none");
-              console.log("Passenger eliminado");
-              tripRequestsList.render();
-            }
-          });
-        }
-      });
-    }else{
-      console.log("No actualizar pasajero");
-    }
-
   },
   deleteTrip: function(ev){
     console.log("delete:")
@@ -275,13 +237,16 @@ var TripRequestsList = Backbone.View.extend({
     trip.fetch({
       success: function(trip){
         trip.save({"notified":"True"});
-        console.log("Enviado correctamete.");
+        alert("Notificaciones enviadas correctamete.");
       }
     });
   },
   //mousedown event to implement single selection
   mousedown: function(e){
-    //console.log("mousedown");
+
+    console.log("mousedown");
+    
+    var evento = e;
     var element = e.target;
     //5 como maximo veces para econtrar si tiene un padre dragable
     try
@@ -294,7 +259,7 @@ var TripRequestsList = Backbone.View.extend({
       }
       //if the element is a draggable item
       if(element.getAttribute('draggable')){
-        console.log("here1");
+        //console.log("draggable");
         //if the multiple selection modifier is not pressed 
         //and the item's grabbed state is currently false
         if
@@ -315,16 +280,44 @@ var TripRequestsList = Backbone.View.extend({
       //and the selection modifier is not pressed 
       else if(!hasModifier(e))
       {
+        //clear dropeffect from the target containers
+        clearDropeffects();
+
         //clear all existing selections
         clearSelections();
       }
+      //else [if the element is anything else and the modifier is pressed]
+      else
+      {
+          //clear dropeffect from the target containers
+          clearDropeffects();
+      }
+      //console.log("\n\nselections:");
+      //console.log(selections);
+      //console.log("\n\n");
     }catch(err){
-      //console.log("no, sorry");
+      //else [if the element is anything else]
+      //and the selection modifier is not pressed 
+      if(!hasModifier(evento))
+      {
+        //clear dropeffect from the target containers
+        clearDropeffects();
+
+        //clear all existing selections
+        clearSelections();
+      }
+      //else [if the element is anything else and the modifier is pressed]
+      else
+      {
+          //clear dropeffect from the target containers
+          clearDropeffects();
+      }
+      console.log("no, sorry");
     }
   },
   //mouseup event to implement multiple selection
   mouseup: function(e){
-    //console.log("mouseup");
+    console.log("mouseup");
     //console.log(e.ctrlKey);
     var element = e.target;
     try{
@@ -369,10 +362,234 @@ var TripRequestsList = Backbone.View.extend({
           addSelection(element);
         }
       }
+      //console.log("\n\nselections:");
+      //console.log(selections);
+      //console.log("\n\n");
     }catch(err){
       console.log("no, sorry");
     }
+  },
+  dragstart: function(e){
+    console.log("dragstart launched");
+
+    /*
+    console.log("Evento");
+    console.log(e);
+    console.log(e.target);
+    console.log(e.target.parentNode);
+
+    console.log("e.originalEvent.dataTransfer NO EXISTE");
+    console.log("Evento Original");
+    console.log(e.originalEvent);
+    console.log(e.originalEvent.target);
+    console.log(e.originalEvent.target.parentNode);
+    console.log(e.originalEvent.dataTransfer);
+    */
+
+    //console.log(e);
+    //console.log(e.target);
+    //console.log(e.target.parentNode);
+    
+    //if the element's parent is not the owner, then block this event
+    if(selections.owner != e.target.parentNode)
+    {
+      //console.log("here 1");
+      e.preventDefault();
+      return;
+    }
+            
+    //[else] if the multiple selection modifier is pressed 
+    //and the item's grabbed state is currently false
+    if
+    (
+        hasModifier(e) 
+        && 
+        e.target.getAttribute('aria-grabbed') == 'false'
+    )
+    {
+        //add this additional selection
+        //console.log("here 2");
+        addSelection(e.target);
+    }
+    
+    //we don't need the transfer data, but we have to define something
+    //otherwise the drop action won't work at all in firefox
+    //most browsers support the proper mime-type syntax, eg. "text/plain"
+    //but we have to use this incorrect syntax for the benefit of IE10+
+    //console.log("here 3");
+    e.originalEvent.dataTransfer.setData('text', '');
+    
+    //apply dropeffect to the target containers
+    addDropeffects();
+  },
+  //----------------------------------------NUEVOS AGREGADOS----------------------------
+
+
+  //dragenter event to set that variable
+  dragenter: function(e){
+    console.log("dragenter launch");
+    //console.log(e.target);
+    related = e.target;
+  },
+  //dragleave event to maintain target highlighting using that variable
+  dragleave: function(e){
+    console.log("dragleave launched")
+    //get a drop target reference from the relatedTarget
+    droptarget = getContainer(related);
+    
+    //if the target is the owner then it's not a valid drop target
+    if(droptarget == selections.owner)
+    {
+        droptarget = null;
+    }
+
+    //if the drop target is different from the last stored reference
+    //(or we have one of those references but not the other one)
+    if(droptarget != selections.droptarget)
+    {
+        //if we have a saved reference, clear its existing dragover class
+        if(selections.droptarget)
+        {
+            selections.droptarget.className = 
+                selections.droptarget.className.replace(/ dragover/g, '');
+        }
+        
+        //apply the dragover class to the new drop target reference
+        if(droptarget)
+        {
+            droptarget.className += ' dragover';
+        }
+                
+        //then save that reference for next time
+        selections.droptarget = droptarget;
+    }
+  },
+  //dragover event to allow the drag by preventing its default
+  dragover: function(e){
+    console.log("dragover launch");
+    //if we have any selected items, allow them to be dragged
+    if(selections.items.length)
+    {
+        e.preventDefault();
+    }
+  },
+  //dragend event to implement items being validly dropped into targets,
+  //or invalidly dropped elsewhere, and to clean-up the interface either way
+  dragend: function(e){
+    console.log("dragend launch");
+    //if we have a valid drop target reference
+    //(which implies that we have some selected items)
+    //console.log("\n\nselections:");
+    //console.log(selections.droptarget);
+    //console.log(selections.items);
+    //console.log("\n\n");
+    if(selections.droptarget)
+    {
+        //append the selected items to the end of the target container
+        for(var len = selections.items.length, i = 0; i < len; i ++)
+        {
+          selections.droptarget.appendChild(selections.items[i]);
+          //added------------------------------------------------------------------
+          //si tiene id_trip 
+          if ($(selections.droptarget).attr('id_trip')!=null){
+            if($(selections.items[i]).attr('last_trip')==$(selections.droptarget).attr('id_trip')){
+              console.log("No actualizar pasajero - nunca llegará aquí 1");
+            }else if($(selections.items[i]).attr('last_trip')=="none"){
+              console.log("creando nuevo pasajero.");
+              var user_newPassenger = $(selections.items[i]).attr('id_cliente');
+              var trip_newPassenger = $(selections.droptarget).attr('id_trip');
+              var tripRequest_newPassenger = $(selections.items[i]).attr('id_solicitud'); 
+
+              var passengerDetails = {
+                "user":user_newPassenger,
+                "tags":[1],
+                "trip":trip_newPassenger,
+                "trip_request":tripRequest_newPassenger,
+                "created_user":1,//cambiar
+                "modified_user":1//cambiar
+              };
+
+              var newPassenger = new Passenger();
+
+              newPassenger.save(passengerDetails, {
+                success: function(newPassenger){
+                  //$(ev.currentTarget.lastElementChild).attr('last_trip',trip_newPassenger); //update trip
+                  console.log("Passenger creado con éxito.");
+                  //tripRequestsList.render();
+                } 
+              });
+            }else{
+              console.log("actualizando pasajero.");
+              var newTripForPassenger = $(selections.droptarget).attr('id_trip');
+              var passenger_id = $(selections.items[i]).attr('passenger_id')
+              var passenger = new Passenger({"id":passenger_id});
+              passenger.fetch({
+                success: function(passenger){
+                  console.log(newTripForPassenger);
+                  passenger.save({"trip":newTripForPassenger});
+                  //$(ev.currentTarget.lastElementChild).attr('last_trip',$(ev.currentTarget).attr('id_trip'));
+                  console.log("Passenger actualizado");
+                  //tripRequestsList.render();
+                }
+              });
+            }
+          }
+          //en caso contrario, cuando es el panel de solicitudes
+          else if($(selections.items[i]).attr('last_trip')!="none"){
+            console.log("eliminando pasajero.");
+            var passenger_id = $(selections.items[i]).attr('passenger_id')
+            var passenger = new Passenger({"id":passenger_id});
+            passenger.fetch({
+              success: function(passenger){
+                passenger.destroy({
+                  success: function(){
+                    //$(ev.currentTarget.lastElementChild).attr('last_trip',"none");
+                    console.log("Passenger eliminado");
+                    //tripRequestsList.render();
+                  }
+                });
+              }
+            });
+          }else{
+            console.log("No actualizar pasajero - nunca llegará aquí 2");
+          }
+
+          //end added-------------------------------------------------------------------
+
+        }
+
+        //prevent default to allow the action            
+        e.preventDefault();
+        //actualiza la vista
+        tripRequestsList.render();
+
+    }else{
+      console.log("No actualizar pasajero main");
+    }
+
+    //if we have any selected items
+    if(selections.items.length)
+    {
+        //clear dropeffect from the target containers
+        clearDropeffects();
+    
+        //if we have a valid drop target reference
+        if(selections.droptarget)
+        {
+            //reset the selections array
+            clearSelections();
+
+            //reset the target's dragover class
+            selections.droptarget.className = 
+                selections.droptarget.className.replace(/ dragover/g, '');
+
+            //reset the target reference
+            selections.droptarget = null;
+        }
+    }
   }
+
+  
 });
 
 //Routers    
@@ -397,32 +614,6 @@ router.on('route:home', function(){
 
 
 Backbone.history.start();
-
-//draggable
-
-function allowDrop(ev) {
-    ev.preventDefault();
-    //console.log(ev.target);
-    //console.log(ev.target.getAttribute("dropable"));
-    if (ev.target.getAttribute("dropable") == "true")
-        ev.dataTransfer.dropEffect = "all";
-    else
-        ev.dataTransfer.dropEffect = "none";
-}
-
-function drag(ev) {
-    ev.dataTransfer.setData("text", ev.target.id);
-}
-
-function drop(ev) {
-    ev.preventDefault();
-    var data = ev.dataTransfer.getData("text");
-    //console.log(data);//id elemento a transferir
-    //console.log(ev.target);//target del lugar de destino
-    //console.log(document.getElementById(data));//target de elemeto a tranferir
-    ev.target.appendChild(document.getElementById(data));
-}
-
 
 
 //---------------------Added-------------------------------
@@ -494,40 +685,267 @@ function hasModifier(e)
     return (e.ctrlKey || e.metaKey || e.shiftKey);
 }
 
+//--------------------------second PART------------------------------
 
-
-//--------------------------------------------------------------------------------
-function initializeNewDragDrop()
-{   
-    //dragstart event to initiate mouse dragging
-    document.addEventListener('dragstart', function(e)
+//function for applying dropeffect to the target containers
+function addDropeffects()
+{
+    //apply aria-dropeffect and tabindex to all targets apart from the owner
+    for(var len = targets.length, i = 0; i < len; i ++)
     {
-        //if the element's parent is not the owner, then block this event
-        if(selections.owner != e.target.parentNode)
-        {
-            e.preventDefault();
-            return;
-        }
-                
-        //[else] if the multiple selection modifier is pressed 
-        //and the item's grabbed state is currently false
         if
         (
-            hasModifier(e) 
+            targets[i] != selections.owner 
             && 
-            e.target.getAttribute('aria-grabbed') == 'false'
+            targets[i].getAttribute('aria-dropeffect') == 'none'
         )
         {
-            //add this additional selection
-            addSelection(e.target);
+            targets[i].setAttribute('aria-dropeffect', 'move');
+            targets[i].setAttribute('tabindex', '0');
+        }
+    }
+
+    //remove aria-grabbed and tabindex from all items inside those containers
+    for(var len = items.length, i = 0; i < len; i ++)
+    {
+        if
+        (
+            items[i].parentNode != selections.owner 
+            && 
+            items[i].getAttribute('aria-grabbed')
+        )
+        {
+            items[i].removeAttribute('aria-grabbed');
+            items[i].removeAttribute('tabindex');
+        }
+    }        
+}
+
+//function for removing dropeffect from the target containers
+function clearDropeffects(aria)
+{
+    //if we have any selected items
+    if(selections.items.length)
+    {
+        //reset aria-dropeffect and remove tabindex from all targets
+        for(var len = targets.length, i = 0; i < len; i ++)
+        {
+            if(targets[i].getAttribute('aria-dropeffect') != 'none')
+            {
+                targets[i].setAttribute('aria-dropeffect', 'none');
+                targets[i].removeAttribute('tabindex');
+            }
+        }
+
+        //restore aria-grabbed and tabindex to all selectable items 
+        //without changing the grabbed value of any existing selected items
+        for(var len = items.length, i = 0; i < len; i ++)
+        {
+            if(!items[i].getAttribute('aria-grabbed'))
+            {
+                items[i].setAttribute('aria-grabbed', 'false');
+                items[i].setAttribute('tabindex', '0');
+            }
+            else if(items[i].getAttribute('aria-grabbed') == 'true')
+            {
+                items[i].setAttribute('tabindex', '0');
+            }
+        }        
+    }
+}
+
+//shortcut function for identifying an event element's target container
+function getContainer(element)
+{
+    do
+    {
+        if(element.nodeType == 1 && element.getAttribute('aria-dropeffect'))
+        {
+            return element;
+        }
+    }
+    while(element = element.parentNode);
+    
+    return null;
+}
+
+//-----------------------------------------------------------------------------
+
+(function()
+{
+
+    //------------------ METODOS DEL TECLADO-------------------------
+    
+    //keydown event to implement selection and abort
+    document.addEventListener('keydown', function(e)
+    {
+        //if the element is a grabbable item 
+        if(e.target.getAttribute('aria-grabbed'))
+        {
+            //Space is the selection or unselection keystroke
+            if(e.keyCode == 32)
+            {
+                //if the multiple selection modifier is pressed 
+                if(hasModifier(e))
+                {
+                    //if the item's grabbed state is currently true
+                    if(e.target.getAttribute('aria-grabbed') == 'true')
+                    {
+                        //if this is the only selected item, clear dropeffect 
+                        //from the target containers, which we must do first
+                        //in case subsequent unselection sets owner to null
+                        if(selections.items.length == 1)
+                        {
+                            clearDropeffects();
+                        }
+
+                        //unselect this item
+                        removeSelection(e.target);
+
+                        //if we have any selections
+                        //apply dropeffect to the target containers, 
+                        //in case earlier selections were made by mouse
+                        if(selections.items.length)
+                        {
+                            addDropeffects();
+                        }
+                
+                        //if that was the only selected item
+                        //then reset the owner container reference
+                        if(!selections.items.length)
+                        {
+                            selections.owner = null;
+                        }
+                    }
+                    
+                    //else [if its grabbed state is currently false]
+                    else
+                    {
+                        //add this additional selection
+                        addSelection(e.target);
+
+                        //apply dropeffect to the target containers    
+                        addDropeffects();
+                    }
+                }
+
+                //else [if the multiple selection modifier is not pressed]
+                //and the item's grabbed state is currently false
+                else if(e.target.getAttribute('aria-grabbed') == 'false')
+                {
+                    //clear dropeffect from the target containers
+                    clearDropeffects();
+
+                    //clear all existing selections
+                    clearSelections();
+            
+                    //add this new selection
+                    addSelection(e.target);
+
+                    //apply dropeffect to the target containers
+                    addDropeffects();
+                }
+                
+                //else [if modifier is not pressed and grabbed is already true]
+                else
+                {
+                    //apply dropeffect to the target containers    
+                    addDropeffects();
+                }
+            
+                //then prevent default to avoid any conflict with native actions
+                e.preventDefault();
+            }
+
+            //Modifier + M is the end-of-selection keystroke
+            if(e.keyCode == 77 && hasModifier(e))
+            {
+                //if we have any selected items
+                if(selections.items.length)
+                {
+                    //apply dropeffect to the target containers    
+                    //in case earlier selections were made by mouse
+                    addDropeffects();
+
+                    //if the owner container is the last one, focus the first one
+                    if(selections.owner == targets[targets.length - 1])
+                    {
+                        targets[0].focus();
+                    }
+                    
+                    //else [if it's not the last one], find and focus the next one
+                    else
+                    {
+                        for(var len = targets.length, i = 0; i < len; i ++)
+                        {
+                            if(selections.owner == targets[i])
+                            {
+                                targets[i + 1].focus();
+                                break;
+                            }
+                        }
+                    }
+                }                
+        
+                //then prevent default to avoid any conflict with native actions
+                e.preventDefault();
+            }
         }
         
-        //we don't need the transfer data, but we have to define something
-        //otherwise the drop action won't work at all in firefox
-        //most browsers support the proper mime-type syntax, eg. "text/plain"
-        //but we have to use this incorrect syntax for the benefit of IE10+
-        e.dataTransfer.setData('text', '');
+        //Escape is the abort keystroke (for any target element)
+        if(e.keyCode == 27)
+        {
+            //if we have any selected items
+            if(selections.items.length)
+            {
+                //clear dropeffect from the target containers
+                clearDropeffects();
+                
+                //then set focus back on the last item that was selected, which is 
+                //necessary because we've removed tabindex from the current focus
+                selections.items[selections.items.length - 1].focus();
+
+                //clear all existing selections
+                clearSelections();
+                
+                //but don't prevent default so that native actions can still occur
+            }
+        }
+            
+    }, false);  
+
+    //teclado--------------------------------------------------------------------
+
+    //keydown event to implement items being dropped into targets
+    document.addEventListener('keydown', function(e)
+    {
+        //if the element is a drop target container
+        if(e.target.getAttribute('aria-dropeffect'))
+        {
+            //Enter or Modifier + M is the drop keystroke
+            if(e.keyCode == 13 || (e.keyCode == 77 && hasModifier(e)))
+            {
+                //append the selected items to the end of the target container
+                for(var len = selections.items.length, i = 0; i < len; i ++)
+                {
+                    e.target.appendChild(selections.items[i]);
+                }
+
+                //clear dropeffect from the target containers
+                clearDropeffects();
     
+                //then set focus back on the last item that was selected, which is 
+                //necessary because we've removed tabindex from the current focus
+                selections.items[selections.items.length - 1].focus();
+
+                //reset the selections array
+                clearSelections();
+
+                //prevent default to to avoid any conflict with native actions
+                e.preventDefault();
+            }
+        }
+
     }, false);
 
-}    
+})();

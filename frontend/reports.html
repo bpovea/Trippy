@@ -72,13 +72,13 @@
 							Origen
 						</th>
 						<th>
-							Hora inicio
+							Fecha/Hora<br>inicio
 						</th>
 						<th>
 							Destino
 						</th>
 						<th>
-							Hora llegada
+							Fecha/Hora<br>llegada
 						</th>
 						<th>
 							Pasajeros
@@ -102,17 +102,17 @@
 						  	<%= trip.get('vehicle').plate %>
 						  </td>
 						  <td>
-						  	<%= trip.get('place_origin').name %><br/>
-						  	<%= trip.get('date_start')%>
+						  	<%= trip.get('place_origin').name %>
 						  </td>
 						  <td>
+						  	<%= trip.get('date_start')%><br/>
 						  	<%= trip.get('time_start') %>
 						  </td>
 						  <td>
-						  	<%= trip.get('place_destination').name %><br/>
-						  	<%= trip.get('date_end') %>
+						  	<%= trip.get('place_destination').name %>
 						  </td>
 						  <td>
+						  	<%= trip.get('date_end') %><br/>
 						  	<%= trip.get('time_end') %>
 						  </td>
 						  <td>
