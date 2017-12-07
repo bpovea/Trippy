@@ -8,6 +8,11 @@ class VehicleBrand(models.Model):
     def __str__(self):
         return self.name
 
+class VehicleYear(models.Model):
+    name = models.TextField(max_length=4)
+
+    def __str__(self):
+        return self.name
 
 class VehicleModel(models.Model):
     name = models.TextField(max_length=100)
@@ -24,6 +29,7 @@ class Vehicle(models.Model):
     plate = models.TextField(max_length=10, db_index=True, unique=True)
     brand = models.ForeignKey('VehicleBrand', on_delete=models.PROTECT,blank=True)
     model = models.ForeignKey('VehicleModel', on_delete=models.PROTECT,blank=True)
+    year = models.TextField(VehicleYear,blank=True)
     photo = models.ImageField(upload_to='vehicles',blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
@@ -90,10 +96,17 @@ class Sector(models.Model):
     def __str__(self):
         #return self.name
         return 'sector #'+str(self.id)
+
+class Area(models.Model):
+    name = models.TextField(max_length=100)
+    def __str__(self):
+        return 'Area #'+str(self.id)+' '+self.name
         
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.PROTECT, primary_key=True)
+    codigo  = models.TextField(max_length=7, blank=True);
+    area = models.ForeignKey('Area', null=True);
     lat_home = models.DecimalField(max_digits=9, decimal_places=6,
                                    null=True, blank=True)
     lon_home = models.DecimalField(max_digits=9, decimal_places=6,
@@ -147,16 +160,18 @@ class Driver(models.Model):
     def __str__(self):
         return self.user.username
 
+class Scheduler(models.Model):
+    time_start = models.TimeField(null=True, blank=True)
+    time_end = models.TimeField(null=True, blank=True)
+    lift_start = models.BooleanField(default=True)
+    lift_end = models.BooleanField(default=True)
+
 
 class Shift(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     tags = models.ManyToManyField('Tag')
-    lift_start = models.BooleanField(default=True)
-    lift_end = models.BooleanField(default=True)
     date_start = models.DateField()
-    time_start = models.DateField(null=True, blank=True)
     date_end = models.DateField()
-    time_end = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
     created_user = models.ForeignKey(User, on_delete=models.PROTECT,
@@ -165,10 +180,6 @@ class Shift(models.Model):
                                       related_name='+')
     def __str__(self):
         return 'shift #'+str(self.id)
-
-
-#class Scheduler(models.Model):
-
 
 
 class TripRequest(models.Model):
@@ -193,9 +204,9 @@ class TripRequest(models.Model):
     trip = models.ForeignKey('Trip', on_delete=models.PROTECT, null=True,
                                 blank=True)
     date_pickup = models.DateField()
-    time_pickup = models.DateField(null=True, blank=True)
+    time_pickup = models.TimeField(null=True, blank=True)
     date_arrive = models.DateField()
-    time_arrive = models.DateField(null=True, blank=True)
+    time_arrive = models.TimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)

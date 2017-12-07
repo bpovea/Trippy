@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Trip, Driver, Passenger, Vehicle, Place, TripRequest, Shift, VehicleBrand, VehicleModel, Tag, Profile, Sector
+from .models import *
 
 admin.site.register(Trip)
 admin.site.register(Driver)
@@ -13,6 +13,10 @@ admin.site.register(VehicleModel)
 admin.site.register(Tag)
 admin.site.register(Profile)
 admin.site.register(Sector)
+admin.site.register(Area)
+admin.site.register(Scheduler)
+
+
 
 # Register your models here.
 #admin.site.register()

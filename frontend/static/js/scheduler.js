@@ -1,45 +1,47 @@
 var maindate = new Date();
-var maindateTemp = new Date();
+maindate.setDate(maindate.getDate()+1-maindate.getDate());
+//var maindateTemp = new Date();
 
-function setdia(date1,date1Temp){
-	var year = document.getElementById("year");
-	year.innerText = mes(date1.getMonth())+" "+String(date1.getFullYear());
-	var date = new Date();
-	var dateTemp = new Date();
-	date.setDate(date1.getDate());
-	dateTemp.setDate(date1Temp.getDate());
-	date.setMonth(date1.getMonth());
-	dateTemp.setMonth(date1Temp.getMonth());
-	date.setFullYear(date1.getFullYear());
-	dateTemp.setFullYear(date1Temp.getFullYear());
+function sethead(date){
+	var actDate = new Date();
+	actDate.setDate(date.getDate());
+	actDate.setMonth(date.getMonth());
+	actDate.setFullYear(date.getFullYear());
+
 	var head = document.getElementById("tableHead");
-	while (date.getDay()!=0){
-		var th = document.getElementById(String(date.getDay()));
-		th.innerText = dia(date.getDay())+"\n"+mes(date.getMonth())+" "+String(date.getDate());
-		date.setDate(date.getDate()-1);
+	var ths = head.getElementsByTagName("th");
+	var lenThs = ths.length;
+	for (i=1;i<lenThs;i++){
+		head.removeChild(ths[1]);
 	}
-	while (dateTemp.getDay()!=1){
-		var th = document.getElementById(String(dateTemp.getDay()));
-		th.innerText = dia(dateTemp.getDay())+"\n"+mes(dateTemp.getMonth())+" "+String(dateTemp.getDate());
-		dateTemp.setDate(dateTemp.getDate()+1);
+
+	var year = document.getElementById("year");
+	year.innerText = mes(actDate.getMonth())+" "+String(actDate.getFullYear());
+
+	var month = actDate.getMonth();
+	while (actDate.getMonth()==month){
+		var th = document.createElement("th");
+		th.innerText = dia(actDate.getDay())+"\n"+String(actDate.getDate());
+		head.appendChild(th);
+		actDate.setDate(actDate.getDate()+1);
 	}
 }
 
 function dia(dayNumber){
 	if(dayNumber==0){
-		return "Domingo";
+		return "D";
 	}else if(dayNumber==1){
-		return "Lunes";
+		return "L";
 	}else if(dayNumber==2){
-		return "Martes";
+		return "M";
 	}else if(dayNumber==3){
-		return "Miércoles";
+		return "Mi";
 	}else if(dayNumber==4){
-		return "Jueves";
+		return "J";
 	}else if(dayNumber==5){
-		return "Viernes";
+		return "V";
 	}else if(dayNumber==6){
-		return "Sábado";
+		return "S";
 	}
 	return "no valido";
 }
@@ -74,12 +76,16 @@ function mes(monthNumber){
 }
 
 $(document).ready(function(){
-	//inicializa el día en la semana actual
-	setdia(maindate, maindateTemp);
+	
+	sethead(maindate);
 
 	$("#newRow").click(function(){
+		console.log("here");
+		var head = document.getElementById("tableHead");
+		var ths = head.getElementsByTagName("th");
 		var tr = document.createElement("tr");
-		for (i=0;i<8;i++){
+		for (i=0;i<ths.length;i++){
+			console.log("hoalalalala");
 			var td = document.createElement("td");
 			tr.appendChild(td);
 		}
@@ -89,14 +95,12 @@ $(document).ready(function(){
 
 
 	$("#lastWeek").click(function(){
-		maindate.setDate(maindate.getDate()-7);
-		maindateTemp.setDate(maindateTemp.getDate()-7);
-		setdia(maindate,maindateTemp);
+		maindate.setMonth(maindate.getMonth()-1);
+		sethead(maindate);
 	});
 	$("#nextWeek").click(function(){
-		maindate.setDate(maindate.getDate()+7);
-		maindateTemp.setDate(maindateTemp.getDate()+7);
-		setdia(maindate,maindateTemp);
+		maindate.setMonth(maindate.getMonth()+1);
+		sethead(maindate);
 	});
 
 });
