@@ -161,10 +161,15 @@ class Driver(models.Model):
         return self.user.username
 
 class Scheduler(models.Model):
+    name = models.TextField(max_length=200, null=True);
+    area = models.ForeignKey(Area, null=True)
     time_start = models.TimeField(null=True, blank=True)
     time_end = models.TimeField(null=True, blank=True)
     lift_start = models.BooleanField(default=True)
     lift_end = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
 
 
 class Shift(models.Model):
@@ -178,6 +183,7 @@ class Shift(models.Model):
                                      related_name='+')
     modified_user = models.ForeignKey(User, on_delete=models.PROTECT,
                                       related_name='+')
+    scheduler = models.ForeignKey(Scheduler, blank=True, null=True)
     def __str__(self):
         return 'shift #'+str(self.id)
 
