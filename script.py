@@ -25,6 +25,15 @@ with open('Sectors.csv') as csvfile:
 		new_sector.save()
 		print('sector '+name+' creado.')
 
+with open('Area.csv') as csvfile:
+	reader = csv.DictReader(csvfile)
+	for row in reader:
+		# The header row values become your keys
+		name = row['name']
+		new_area = Area(name=name)
+		new_area.save()
+		print('area '+name+' creado.')
+
 
 with open('Profiles.csv') as csvfile:
 	reader = csv.DictReader(csvfile)
@@ -33,9 +42,10 @@ with open('Profiles.csv') as csvfile:
 		user = User.objects.get(id=int(row['user']))
 		codigo = row['codigo']
 		sector = Sector.objects.get(id=int(row['sector']))
+		area = Area.objects.get(id=int(row['area']))
 		address = row['addres']
 		phone = row['phone']
-		new_profile = Profile(user=user,address=address,sector=sector,phone=phone,codigo=codigo)
+		new_profile = Profile(user=user,address=address,sector=sector,phone=phone,codigo=codigo, area=area)
 		new_profile.save()
 		print('profile '+row['user']+' creado.')
 
@@ -88,5 +98,8 @@ with open('Drivers.csv') as csvfile:
 		new_driver = Driver(user=user,vehicles=vehicles)
 		new_driver.save()
 		print(row['user']+' creado.')
+
+
+
 
 

@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import TripRequest, Place, Trip, Driver, Passenger, Vehicle, Profile
+from .models import *
 from .mail import send_email
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
@@ -146,6 +146,15 @@ def profilesList(request):
     return JsonResponse(serializer.data, safe = False)
 
 @csrf_exempt 
+@api_view(['GET'])
+def profileListFilter(request):
+  if request.method == 'GET':
+    area_id = request.GET.get('id')
+    profiles = Profile.objects.filter(area=area_id)
+    serializer = ProfileSerializerBP(profiles, many = True)
+    return JsonResponse(serializer.data, safe = False)
+
+@csrf_exempt 
 @api_view(['GET', 'POST'])
 def passengerList(request):
   if request.method == 'GET':
@@ -200,6 +209,14 @@ def passengerDetail(request, pk):
         tripRequest.save()
         passenger.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+@csrf_exempt 
+@api_view(['GET'])
+def areaList(request):
+  if request.method == 'GET':
+    areas = Area.objects.all()
+    serializer = AreaSerializerBP(areas, many = True)
+    return JsonResponse(serializer.data, safe = False)
 
 
 # Create your views here.

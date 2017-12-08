@@ -96,6 +96,19 @@ class TripRequestSerializerBP(serializers.ModelSerializer):
         model = TripRequest
         fields = '__all__'
 
+#added scheduler
+
+
+class AreaSerializerBP(serializers.ModelSerializer):
+
+    class Meta:
+        model = Area
+        fields = '__all__'
+
+
+
+
+# end added
 
 
 

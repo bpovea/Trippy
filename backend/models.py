@@ -99,6 +99,7 @@ class Sector(models.Model):
 
 class Area(models.Model):
     name = models.TextField(max_length=100)
+
     def __str__(self):
         return 'Area #'+str(self.id)+' '+self.name
         
@@ -106,7 +107,7 @@ class Area(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.PROTECT, primary_key=True)
     codigo  = models.TextField(max_length=7, blank=True);
-    area = models.ForeignKey('Area', null=True);
+    area = models.ForeignKey(Area, null=True);
     lat_home = models.DecimalField(max_digits=9, decimal_places=6,
                                    null=True, blank=True)
     lon_home = models.DecimalField(max_digits=9, decimal_places=6,

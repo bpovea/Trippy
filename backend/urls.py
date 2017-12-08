@@ -27,7 +27,9 @@ urlpatterns = [
 	url(r'^trips/(?P<pk>[0-9]+)$', csrf_exempt(views.tripsDetail)),
 	url(r'^tripsIds/$', csrf_exempt(views.tripIdsList)),
 	url(r'^api/trips', TripViewSetJR.as_view({'get': 'list'})),
-	url(r'^api/vehicles', VehicleViewSetJR.as_view({'get': 'list'}))
+	url(r'^api/vehicles', VehicleViewSetJR.as_view({'get': 'list'})),
+	url(r'^areas/$', csrf_exempt(views.areaList)),
+	url(r'^profiles/filter/$', csrf_exempt(views.profileListFilter ))
 
 ]
 
