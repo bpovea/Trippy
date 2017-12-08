@@ -2,7 +2,7 @@ import csv
 from django.contrib.auth.models import User
 from backend.models import *
 
-with open('Usuarios.csv') as csvfile:
+with open('data/Usuarios.csv') as csvfile:
 	reader = csv.DictReader(csvfile)
 	for row in reader:
 		# The header row values become your keys
@@ -16,7 +16,7 @@ with open('Usuarios.csv') as csvfile:
 		new_user.save()
 		print("user "+username+" creado.")
 
-with open('Sectors.csv') as csvfile:
+with open('data/Sectors.csv') as csvfile:
 	reader = csv.DictReader(csvfile)
 	for row in reader:
 		# The header row values become your keys
@@ -25,7 +25,7 @@ with open('Sectors.csv') as csvfile:
 		new_sector.save()
 		print('sector '+name+' creado.')
 
-with open('Area.csv') as csvfile:
+with open('data/Area.csv') as csvfile:
 	reader = csv.DictReader(csvfile)
 	for row in reader:
 		# The header row values become your keys
@@ -35,7 +35,7 @@ with open('Area.csv') as csvfile:
 		print('area '+name+' creado.')
 
 
-with open('Profiles.csv') as csvfile:
+with open('data/Profiles.csv') as csvfile:
 	reader = csv.DictReader(csvfile)
 	for row in reader:
 		# The header row values become your keys
@@ -49,7 +49,7 @@ with open('Profiles.csv') as csvfile:
 		new_profile.save()
 		print('profile '+row['user']+' creado.')
 
-with open('Vehicle_brand.csv') as csvfile:
+with open('data/Vehicle_brand.csv') as csvfile:
 	reader = csv.DictReader(csvfile)
 	for row in reader:
 		# The header row values become your keys
@@ -58,7 +58,7 @@ with open('Vehicle_brand.csv') as csvfile:
 		new_brand.save()
 		print('brand '+name+' creado.')
 
-with open('Vehicle_year.csv') as csvfile:
+with open('data/Vehicle_year.csv') as csvfile:
 	reader = csv.DictReader(csvfile)
 	for row in reader:
 		# The header row values become your keys
@@ -67,7 +67,7 @@ with open('Vehicle_year.csv') as csvfile:
 		new_year.save()
 		print('Year '+name+' creado.')
 
-with open('Vehicle_models.csv') as csvfile:
+with open('data/Vehicle_models.csv') as csvfile:
 	reader = csv.DictReader(csvfile)
 	for row in reader:
 		# The header row values become your keys
@@ -76,7 +76,7 @@ with open('Vehicle_models.csv') as csvfile:
 		new_model.save()
 		print('Model '+name+' creado.')
 
-with open('Vehicle.csv') as csvfile:
+with open('data/Vehicle.csv') as csvfile:
 	reader = csv.DictReader(csvfile)
 	for row in reader:
 		# The header row values become your keys
@@ -89,7 +89,7 @@ with open('Vehicle.csv') as csvfile:
 		print(plate+' creado.')
 
 
-with open('Drivers.csv') as csvfile:
+with open('data/Drivers.csv') as csvfile:
 	reader = csv.DictReader(csvfile)
 	for row in reader:
 		# The header row values become your keys
